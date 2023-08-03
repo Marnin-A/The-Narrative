@@ -10,6 +10,7 @@ type article = {
   description: string;
   url: string;
   urlToImage: string;
+  urlToVideo?: string | undefined;
   publishedAt: string;
   content: string;
 };
