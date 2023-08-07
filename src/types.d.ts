@@ -14,3 +14,8 @@ type article = {
   publishedAt: string;
   content: string;
 };
+
+type NewsProp = {
+  details: article;
+  key: article["id"];
+};

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import LoadingImg from "../assets/loading2.webp";
 import axios from "axios";
 import BasicModal from "./Modal";
 import Hero from "./Hero";
+import NewsCard from "./NewsCard";
 
 const NewsFeed = () => {
   const [articles, setArticles] = React.useState<Array<article>>([]);
@@ -13,11 +15,14 @@ const NewsFeed = () => {
   const fetchArticles = async () => {
     let url = `https://newsapi.org/v2/everything?q=bitcoin&apiKey=${apiKey}`;
     try {
+      // Get data from API
       const response = await axios.get(url);
       const articles = response.data.articles;
       setArticles(response.data.articles);
-      // console.log(response);
+      setIsLoading(false);
       console.log(articles);
+
+      // Check length to detect possible error
       if (articles.length === 0) {
         setDidError(true);
       }
@@ -25,33 +30,28 @@ const NewsFeed = () => {
       setDidError(true);
       console.error(error);
     }
-    setIsLoading(false);
   };
+
   React.useEffect(() => {
     fetchArticles();
   }, []);
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="w-screen h-screen flex items-center justify-center">
+        <img src={LoadingImg} alt="" />
+        <BasicModal open={didError} handleClose={handleClose} />
+      </div>
+    );
   } else {
-    console.log(articles);
-    const heroImage = articles[0].urlToImage;
     return (
       <div>
-        <div>{articles && <Hero heroImg={heroImage} />}</div>
         <div>
-          {articles.map((article: article, key: article["id"]) => (
-            <div key={key}>
-              {/* {article.urlToImage && CheckForVideo(article.urlToImage)} */}
-              <img
-                className="w-full"
-                src={article.urlToImage}
-                loading="lazy"
-                alt={article.title}
-              />
-              <h2>{article.title}</h2>
-              <p>{article.description}</p>
-              <p>Source: {article.source.name}</p>
-            </div>
+          <Hero />
+        </div>
+        <div className="flex flex-wrap gap-6 justify-center">
+          {articles.map((details: article, key: article["id"]) => (
+            <NewsCard details={details} key={key} />
           ))}
         </div>
         <BasicModal open={didError} handleClose={handleClose} />
@@ -61,16 +61,3 @@ const NewsFeed = () => {
 };
 
 export default NewsFeed;
-
-// Check the the last 3 characters of the url to
-// determine if the article has a video attached
-function CheckForVideo(url: string): boolean {
-  const length: number = url.length;
-  console.log(url.slice(length - 3, length));
-  if (url.slice(length - 3, length) === "mp4") {
-    console.log("video");
-    return true;
-  } else {
-    return false;
-  }
-}
